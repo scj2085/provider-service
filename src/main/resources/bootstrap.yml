@@ -1,0 +1,43 @@
+#引入外部的属性必须配置在bootstrap.properties中，config部分内容才能被正确加载。因为config的相关配置会先于application.properties，而bootstrap.properties的加载也是先于application.properties。
+approve: aa   
+spring:
+  application:
+    name: approve #对应前配置文件中的{application}部分
+  cloud:
+    config: 
+      username: shichangjian #连接config-service的用户名
+      password: 123
+ #     uri: "http://localhost:7001/" #当引用serviceid时，就代替了此url
+      profile: dev,mysql
+      label: master
+ #     failFast: true #注意：此功能慎用 ,uri时起作用，serviceid时不起作用，还需要打开重试机制，连锁效应重试机制在ribbon中自带，默认false，不要轻易打开。
+ #     retry: #重试机制参数配置
+ #       multiplier: 1000 #初始重试间隔时间，默认1000毫秒
+ #       initial-interval: 1.1 #下一间隔时间，默认1.1，当最初间隔时间1000毫秒时，下次失败的间隔时间是1100毫秒
+ #       max-interval: 2000 #最大间隔时间，默认2000毫秒
+ #       max-attempts: 6 #最大重试次数，默认6次
+      discovery:
+        enabled: true #参数设置为true，开启通过服务来访问Config Server的功能
+        serviceId: approve-config #参数来指定Config Server注册的服务名
+      #其实访问地址是:uri/application/dev/master
+    bus:
+      trace:
+        enabled: true #开启trace跟踪信息的监听和记录  
+  sleuth:
+    sampler:
+      percentage: 1 #监控信息采集，1代表100%
+server:
+  port: 2007
+management:
+  port: 1123   #actuator暴露接口使用的端口，为了和api接口使用的端口进行分离
+  context-path: /admin   #actuator暴露接口的前缀
+  security:
+    enabled: true #actuator是否需要安全保证，管理端点暴露，此配置限制了及时动态刷新，待解决？？？？？
+security:
+  basic:
+    enabled: true #指定接口需要验证
+    path: /admin #针对/admin路径进行认证
+  user:
+    name: shichangjian #为此服务添加访问权限
+    password: 123   
+random: ${random.int[10,20]}	#产生一个10-20的随机数，用于秘钥和端口
